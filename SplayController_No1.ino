@@ -16,6 +16,8 @@ void setup() {
 float Vcc = 5.0;  //電源電圧
 float distance_1;
 float distance_2;
+int   sense_count = 0;
+
 const int ANALOG = 5;//センサ信号入力
 
 bool sensorCheck(){
@@ -26,35 +28,34 @@ bool sensorCheck(){
   distance_2 = 26.549*pow(distance_1,-1.2091);
   //Serial.println(distance_2); 
 
-  // 20cmより近づいたら ON
-  if(distance_2 < 20){
-    //Serial.println("true"); 
+  // 15cmより近づいたらカウント
+  if(distance_2 < 15)
+    sense_count ++ ;
+  else{
+    sense_count = 0;
+  }
+  
+  if( 3 == sense_count ){
+    Serial.println("true"); 
     return true ;
   }else{
-    //Serial.println("false"); 
     return false;
   }
 }
 
-bool oneShot = false;
 int count = 0;              // サーボ制御用のカウンター
-const int trigger_on  = 20; // トリガーONをにするカウント値
-const int trigger_off = 10; // トリガーOFFをにするカウント値
+const int trigger_on  = 27; // トリガーONをにするカウント値
+const int trigger_off = 15; // トリガーOFFをにするカウント値
 
 void loop() {
   // put your main code here, to run repeatedly:
 
   // センサーチェック
   if( count == 0 && sensorCheck() ){
-    if( oneShot == false ){
-      oneShot = true ;
-      Serial.println("oneShot"); 
-      count = trigger_on ;
-    }
-  }else if(sensorCheck() == false){
-    oneShot = false ;
+    //Serial.println("oneShot"); 
+    count = trigger_on ;
   }
-
+  
   // カウンターの値によりサーボを駆動
   if(count == trigger_on){        // トリガーON
     myservo.write(150);
